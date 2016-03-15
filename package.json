@@ -1,0 +1,31 @@
+{
+  "name": "http-file-store-webapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@mh-cbon/http-file-store": "^2.11.0",
+    "riot": "^2.3.15"
+  },
+  "devDependencies": {
+    "babel-core": "^6.5.2",
+    "babel-loader": "^6.2.3",
+    "babel-preset-es2015": "^6.5.0",
+    "tag-loader": "^0.3.0",
+    "webpack": "^1.12.13",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "dev": "npm run backend & npm run frontend & wait",
+    "frontend": "npm run watch & npm run http",
+    "backend": "npm run http-file-store",
+    "http-file-store": "http-file-store -v -c ./demo/http-store.json",
+    "watch": "webpack -w",
+    "http": "http-server -o -p 8081"
+  },
+  "keywords": [],
+  "author": "mh-cbon <mh-cbon@users.noreply.github.com>",
+  "license": "MIT"
+}
