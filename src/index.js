@@ -26,19 +26,27 @@ document.addEventListener('DOMContentLoaded', function () {
   var alert       = riot.mount('alert', {})[0];
 
   app.on('path-changed', function (newPath) {
+
+    browser.status    = "loading";
+    mkdir.status      = "loading";
+    breadcrumb.status = "loading";
+
     client.read(newPath, function (err, res) {
       if (err) return itFailedToBrowse();
 
-      browser.path = newPath;
-      browser.items = res;
+      browser.status  = "loaded";
+      browser.path    = newPath;
+      browser.items   = res;
       browser.endPointUrl = client.endPointUrl();
       browser.update();
 
-      mkdir.path = newPath;
+      mkdir.status  = "loaded";
+      mkdir.path    = newPath;
       mkdir.update();
 
-      breadcrumb.path = newPath;
-      breadcrumb.items = newPath.split('/');
+      breadcrumb.status = "loaded";
+      breadcrumb.path   = newPath;
+      breadcrumb.items  = newPath.split('/');
       breadcrumb.items.pop();
       breadcrumb.update();
     });

@@ -1,6 +1,11 @@
 <file-browser>
 
+    <div if={status==='loading'}>
+      Please wait while loading....
+    </div>
+
     <table
+        if={status!=='loading'}
         ondragenter={dragEnter}
         ondragleave={dragLeave}
         ondragover={dragOver}
@@ -31,6 +36,7 @@
   <script>
     var dropNormalizer = require('../drop-normalizer.js')
     var tag = this;
+    tag.status = 'loading'
 
     tag.items = [];
     tag.endPointUrl = '';

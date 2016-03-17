@@ -1,6 +1,6 @@
 <mkdir>
 
-    <form name="mkdir" onsubmit={mkdir}>
+    <form name="mkdir" onsubmit={mkdir} if={status!=='loading'}>
       <a href=#>+</a>
       <input type="text" name="name" placeholder="directory name" />
       <button>Create</button>
@@ -11,6 +11,7 @@
 
   <script>
     var tag = this;
+    tag.status = 'loading'
 
     tag.items = [];
     tag.path = "";

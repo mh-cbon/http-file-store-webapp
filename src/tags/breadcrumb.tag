@@ -1,6 +1,6 @@
 <breadcrumb>
 
-    <table>
+    <table if={status!=='loading'}>
       <tr>
           <td each={item, k in items}><a href=# onclick={itemClicked}>/{item || 'root'}</a></td>
       </tr>
@@ -11,6 +11,7 @@
 
   <script>
     var tag = this;
+    tag.status = 'loading'
 
     tag.items = [];
 

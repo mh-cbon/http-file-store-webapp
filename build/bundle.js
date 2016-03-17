@@ -53,8 +53,8 @@
 	__webpack_require__(7);
 	__webpack_require__(8);
 	__webpack_require__(9);
-	__webpack_require__(18);
-	var FSClient = __webpack_require__(10);
+	__webpack_require__(10);
+	var FSClient = __webpack_require__(11);
 
 	document.addEventListener('DOMContentLoaded', function () {
 
@@ -73,17 +73,25 @@
 	  var alert = riot.mount('alert', {})[0];
 
 	  app.on('path-changed', function (newPath) {
+
+	    browser.status = "loading";
+	    mkdir.status = "loading";
+	    breadcrumb.status = "loading";
+
 	    client.read(newPath, function (err, res) {
 	      if (err) return itFailedToBrowse();
 
+	      browser.status = "loaded";
 	      browser.path = newPath;
 	      browser.items = res;
 	      browser.endPointUrl = client.endPointUrl();
 	      browser.update();
 
+	      mkdir.status = "loaded";
 	      mkdir.path = newPath;
 	      mkdir.update();
 
+	      breadcrumb.status = "loaded";
 	      breadcrumb.path = newPath;
 	      breadcrumb.items = newPath.split('/');
 	      breadcrumb.items.pop();
@@ -3101,9 +3109,10 @@
 
 	var riot = __webpack_require__(1);
 
-	riot.tag2('file-browser', '<table ondragenter="{dragEnter}" ondragleave="{dragLeave}" ondragover="{dragOver}" ondrop="{drop}"> <tr> <td> <a href="#" onclick="{itemClicked}">..</a> </td> <td>&nbsp;</td> </tr> <tr each="{items}"> <td class="type-{type}" ondragenter="{dragEnter}" ondragleave="{dragLeave}" ondragover="{dragOver}" ondrop="{drop}"><a href="{path}{name}" onclick="{itemClicked}">{name}</a></td> <td><a href="#" onclick="{unlinkItem}">X</a></td> </tr> </table>', 'file-browser .drag-over,[riot-tag="file-browser"] .drag-over,[data-is="file-browser"] .drag-over{ background-color: blue; }', '', function(opts) {
+	riot.tag2('file-browser', '<div if="{status===\'loading\'}"> Please wait while loading.... </div> <table if="{status!==\'loading\'}" ondragenter="{dragEnter}" ondragleave="{dragLeave}" ondragover="{dragOver}" ondrop="{drop}"> <tr> <td> <a href="#" onclick="{itemClicked}">..</a> </td> <td>&nbsp;</td> </tr> <tr each="{items}"> <td class="type-{type}" ondragenter="{dragEnter}" ondragleave="{dragLeave}" ondragover="{dragOver}" ondrop="{drop}"><a href="{path}{name}" onclick="{itemClicked}">{name}</a></td> <td><a href="#" onclick="{unlinkItem}">X</a></td> </tr> </table>', 'file-browser .drag-over,[riot-tag="file-browser"] .drag-over,[data-is="file-browser"] .drag-over{ background-color: blue; }', '', function(opts) {
 	    var dropNormalizer = __webpack_require__(6)
 	    var tag = this;
+	    tag.status = 'loading'
 
 	    tag.items = [];
 	    tag.endPointUrl = '';
@@ -3269,8 +3278,9 @@
 
 	var riot = __webpack_require__(1);
 
-	riot.tag2('mkdir', '<form name="mkdir" onsubmit="{mkdir}"> <a href="#">+</a> <input type="text" name="name" placeholder="directory name"> <button>Create</button> </form>', '', '', function(opts) {
+	riot.tag2('mkdir', '<form name="mkdir" onsubmit="{mkdir}" if="{status!==\'loading\'}"> <a href="#">+</a> <input type="text" name="name" placeholder="directory name"> <button>Create</button> </form>', '', '', function(opts) {
 	    var tag = this;
+	    tag.status = 'loading'
 
 	    tag.items = [];
 	    tag.path = "";
@@ -3293,8 +3303,9 @@
 
 	var riot = __webpack_require__(1);
 
-	riot.tag2('breadcrumb', '<table> <tr> <td each="{item, k in items}"><a href="#" onclick="{itemClicked}">/{item || \'root\'}</a></td> </tr> </table>', '', '', function(opts) {
+	riot.tag2('breadcrumb', '<table if="{status!==\'loading\'}"> <tr> <td each="{item, k in items}"><a href="#" onclick="{itemClicked}">/{item || \'root\'}</a></td> </tr> </table>', '', '', function(opts) {
 	    var tag = this;
+	    tag.status = 'loading'
 
 	    tag.items = [];
 
@@ -3334,9 +3345,46 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var url     = __webpack_require__(11);
+	var riot = __webpack_require__(1);
+
+	riot.tag2('alert', '<div class="alert" if="{display}"> <div class="background"></div> <div class="front"> <div class="title">{title}</div> <div class="question">{question}</div> <div class="confirm"> <ul> <li each="{choice in choices}"><button onclick="{choiceClicked}">{choice.label}</button></li> </ul> </div> </div> </div>', 'alert .alert,[riot-tag="alert"] .alert,[data-is="alert"] .alert{ position: fixed; top:0;left:0; height:100%; width:100%; z-index:100; } alert .background,[riot-tag="alert"] .background,[data-is="alert"] .background{ position: absolute; top:0;left:0; height:100%; width:100%; background-color:black; opacity:0.7; } alert .front,[riot-tag="alert"] .front,[data-is="alert"] .front{ position: absolute; top:25%; left:25%; height:50%; width:50%; background-color: white; padding: .5em; } alert .title,[riot-tag="alert"] .title,[data-is="alert"] .title{ text-transform:uppercase; } alert .question,[riot-tag="alert"] .question,[data-is="alert"] .question{ margin-top: 1em; margin-left: 1em; } alert .confirm ul,[riot-tag="alert"] .confirm ul,[data-is="alert"] .confirm ul{ position: absolute; bottom: 0.5em; right: 0.5em; display:block; } alert .confirm ul,[riot-tag="alert"] .confirm ul,[data-is="alert"] .confirm ul{ margin:0; padding:0; list-style-type:none; } alert .confirm ul li,[riot-tag="alert"] .confirm ul li,[data-is="alert"] .confirm ul li{ display: inline-block; margin-right: .5em; }', '', function(opts) {
+	    var tag = this;
+	    tag.display = !true
+	    tag.title = ''
+	    tag.question = ''
+	    tag.choices = [
+
+	    ]
+	    var pendingCb;
+
+	    tag.on('mount', function(){
+	    });
+
+	    this.choiceClicked = function (e) {
+	      e.preventDefault();
+	      tag.display = false;
+	      console.log(e.item)
+	      if (pendingCb) pendingCb(e.item.choice.value);
+	      pendingCb = null;
+	      tag.update();
+	    }.bind(this)
+
+	    this.show = function (then) {
+	      tag.display = true;
+	      pendingCb = then;
+	      tag.update();
+	    }.bind(this)
+
+	});
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var url     = __webpack_require__(12);
 	var path    = __webpack_require__(3);
-	var Emitter = __webpack_require__(17);
+	var Emitter = __webpack_require__(18);
 
 	Emitter.prototype.trigger = Emitter.prototype.emit;
 
@@ -3501,7 +3549,7 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -3525,7 +3573,7 @@
 	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 	// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-	var punycode = __webpack_require__(12);
+	var punycode = __webpack_require__(13);
 
 	exports.parse = urlParse;
 	exports.resolve = urlResolve;
@@ -3597,7 +3645,7 @@
 	      'gopher:': true,
 	      'file:': true
 	    },
-	    querystring = __webpack_require__(14);
+	    querystring = __webpack_require__(15);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
 	  if (url && isObject(url) && url instanceof Url) return url;
@@ -4214,7 +4262,7 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/punycode v1.3.2 by @mathias */
@@ -4746,10 +4794,10 @@
 
 	}(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)(module), (function() { return this; }())))
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -4765,17 +4813,17 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	exports.decode = exports.parse = __webpack_require__(15);
-	exports.encode = exports.stringify = __webpack_require__(16);
+	exports.decode = exports.parse = __webpack_require__(16);
+	exports.encode = exports.stringify = __webpack_require__(17);
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -4861,7 +4909,7 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -4931,7 +4979,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	function _each(arr, func, thisArg) {
@@ -5014,43 +5062,6 @@
 	};
 
 	module.exports = EventEmitter;
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var riot = __webpack_require__(1);
-
-	riot.tag2('alert', '<div class="alert" if="{display}"> <div class="background"></div> <div class="front"> <div class="title">{title}</div> <div class="question">{question}</div> <div class="confirm"> <ul> <li each="{choice in choices}"><button onclick="{choiceClicked}">{choice.label}</button></li> </ul> </div> </div> </div>', 'alert .alert,[riot-tag="alert"] .alert,[data-is="alert"] .alert{ position: fixed; top:0;left:0; height:100%; width:100%; z-index:100; } alert .background,[riot-tag="alert"] .background,[data-is="alert"] .background{ position: absolute; top:0;left:0; height:100%; width:100%; background-color:black; opacity:0.7; } alert .front,[riot-tag="alert"] .front,[data-is="alert"] .front{ position: absolute; top:25%; left:25%; height:50%; width:50%; background-color: white; padding: .5em; } alert .title,[riot-tag="alert"] .title,[data-is="alert"] .title{ text-transform:uppercase; } alert .question,[riot-tag="alert"] .question,[data-is="alert"] .question{ margin-top: 1em; margin-left: 1em; } alert .confirm ul,[riot-tag="alert"] .confirm ul,[data-is="alert"] .confirm ul{ position: absolute; bottom: 0.5em; right: 0.5em; display:block; } alert .confirm ul,[riot-tag="alert"] .confirm ul,[data-is="alert"] .confirm ul{ margin:0; padding:0; list-style-type:none; } alert .confirm ul li,[riot-tag="alert"] .confirm ul li,[data-is="alert"] .confirm ul li{ display: inline-block; margin-right: .5em; }', '', function(opts) {
-	    var tag = this;
-	    tag.display = !true
-	    tag.title = ''
-	    tag.question = ''
-	    tag.choices = [
-
-	    ]
-	    var pendingCb;
-
-	    tag.on('mount', function(){
-	    });
-
-	    this.choiceClicked = function (e) {
-	      e.preventDefault();
-	      tag.display = false;
-	      console.log(e.item)
-	      if (pendingCb) pendingCb(e.item.choice.value);
-	      pendingCb = null;
-	      tag.update();
-	    }.bind(this)
-
-	    this.show = function (then) {
-	      tag.display = true;
-	      pendingCb = then;
-	      tag.update();
-	    }.bind(this)
-
-	});
 
 
 /***/ }
