@@ -74,28 +74,33 @@
 
 	  app.on('path-changed', function (newPath) {
 
-	    browser.status = "loading";
-	    mkdir.status = "loading";
-	    breadcrumb.status = "loading";
+	    [browser, mkdir, breadcrumb].forEach(function (c) {
+	      c.status = 'loading';
+	    });
 
 	    client.read(newPath, function (err, res) {
+
+	      [browser, mkdir, breadcrumb].forEach(function (c) {
+	        c.status = 'loaded';
+	        c.update();
+	      });
+
 	      if (err) return itFailedToBrowse();
 
-	      browser.status = "loaded";
 	      browser.path = newPath;
 	      browser.items = res;
 	      browser.endPointUrl = client.endPointUrl();
-	      browser.update();
 
-	      mkdir.status = "loaded";
 	      mkdir.path = newPath;
-	      mkdir.update();
 
-	      breadcrumb.status = "loaded";
 	      breadcrumb.path = newPath;
 	      breadcrumb.items = newPath.split('/');
 	      breadcrumb.items.pop();
-	      breadcrumb.update();
+
+	      [browser, mkdir, breadcrumb].forEach(function (c) {
+	        c.path = newPath;
+	        c.update();
+	      });
 	    });
 	  });
 
