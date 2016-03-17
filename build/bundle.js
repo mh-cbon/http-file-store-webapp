@@ -109,7 +109,7 @@
 	  mkdir.on('new-dir', function (targetPath, name) {
 	    client.mkdir(targetPath, name, function (err, data) {
 	      if (err) {
-	        return; // trigger an alert
+	        return itFailedToCreateADirectory();
 	      }
 	      browser.items = data;
 	      browser.update();
@@ -177,6 +177,16 @@
 	  function itFailedToBrowse(then) {
 	    alert.title = 'Can not browse the path';
 	    alert.question = 'The new path can not be browsed, please alert your admin.';
+	    alert.choices = [{
+	      label: 'OK',
+	      value: true
+	    }];
+	    alert.show(then);
+	  }
+
+	  function itFailedToCreateADirectory(then) {
+	    alert.title = 'Can create this directory';
+	    alert.question = 'The directory was not created, please alert your admin.';
 	    alert.choices = [{
 	      label: 'OK',
 	      value: true
