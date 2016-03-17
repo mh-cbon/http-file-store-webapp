@@ -60,12 +60,9 @@
 
 	  var app = riot.observable();
 
-	  var client = new FSClient({
-	    protocol: 'http:',
-	    hostname: '127.0.0.1',
-	    port: 8091,
-	    url_base: ''
-	  });
+	  var remote = getURLParameter('remote') || 'http://127.0.0.1:8091/';
+	  var client = new FSClient(remote);
+
 	  var browser = riot.mount('file-browser', {})[0];
 	  var breadcrumb = riot.mount('breadcrumb', {})[0];
 	  var upload = riot.mount('upload', {})[0];
@@ -237,6 +234,11 @@
 	      upload.items.splice(index, 1);
 	      upload.update();
 	    });
+	  }
+
+	  // from http://stackoverflow.com/questions/11582512/how-to-get-url-parameters-with-javascript/11582513#11582513
+	  function getURLParameter(name) {
+	    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
 	  }
 	});
 
